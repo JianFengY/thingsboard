@@ -230,7 +230,9 @@
                             </goals>
                             <configuration>
                                 <sources>
-                                    <source>${basedir}/target/generated-sources</source>
+                                    <!-- <source>${basedir}/target/generated-sources</source> -->
+                                    <source>${basedir}/target/generated-sources/grpc-java</source>
+                                    <source>${basedir}/target/generated-sources/java</source>
                                 </sources>
                             </configuration>
                         </execution>
