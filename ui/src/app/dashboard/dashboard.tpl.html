@@ -172,7 +172,7 @@
                             on-apply-details="vm.saveWidget(vm.widgetForm)"
                             the-form="vm.widgetForm">
             <details-buttons tb-help="vm.helpLinkIdForWidgetType()" help-container-id="help-container">
-                <div id="help-container"></div>
+                <!-- <div id="help-container"></div> -->
             </details-buttons>
             <form name="vm.widgetForm" ng-if="vm.isEditingWidget">
                 <tb-edit-widget
@@ -332,6 +332,6 @@
         </section>
     </section>
     <section class="tb-powered-by-footer" ng-style="{'color': vm.dashboard.configuration.settings.titleColor}">
-        <span>Powered by <a href="https://thingsboard.io" target="_blank">Thingsboard v.{{ vm.thingsboardVersion }}</a></span>
+
     </section>
 </md-content>
