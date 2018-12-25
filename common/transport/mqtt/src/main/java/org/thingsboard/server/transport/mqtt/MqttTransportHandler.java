@@ -198,6 +198,12 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
                 case MqttTopics.GATEWAY_DISCONNECT_TOPIC:
                     gatewaySessionHandler.onDeviceDisconnect(mqttMsg);
                     break;
+                case MqttTopics.G1_GATEWAY_UPDATA:
+                	// TODO G1 数据上传
+                	break;
+                case MqttTopics.G1_GATEWAY_DOWNDATA:
+                	// TODO G1 数据下行
+                	break;
             }
         } catch (RuntimeException | AdaptorException e) {
             log.warn("[{}] Failed to process publish msg [{}][{}]", sessionId, topicName, msgId, e);
