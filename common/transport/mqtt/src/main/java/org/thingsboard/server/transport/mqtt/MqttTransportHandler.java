@@ -168,7 +168,7 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
         int msgId = mqttMsg.variableHeader().packetId();
         log.trace("[{}][{}] Processing publish msg [{}][{}]!", sessionId, deviceSessionCtx.getDeviceId(), topicName, msgId);
 
-        if (topicName.startsWith(MqttTopics.BASE_GATEWAY_API_TOPIC)) {
+        if (topicName.startsWith(MqttTopics.BASE_GATEWAY_API_TOPIC) || topicName.startsWith(MqttTopics.G1_GATEWAY_DOWNDATA) || topicName.startsWith("UPDATA")) {
             if (gatewaySessionHandler != null) {
                 handleGatewayPublishMsg(topicName, msgId, mqttMsg);
             }
@@ -199,7 +199,8 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
                     gatewaySessionHandler.onDeviceDisconnect(mqttMsg);
                     break;
                 case MqttTopics.G1_GATEWAY_UPDATA:
-                	// TODO G1 数据上传
+                	// G1 数据上行
+                	gatewaySessionHandler.onDeviceTelemetryG1(mqttMsg);
                 	break;
                 case MqttTopics.G1_GATEWAY_DOWNDATA:
                 	// TODO G1 数据下行
