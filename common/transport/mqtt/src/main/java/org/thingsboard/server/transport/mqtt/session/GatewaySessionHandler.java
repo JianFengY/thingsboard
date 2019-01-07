@@ -158,6 +158,40 @@ public class GatewaySessionHandler {
         devices.forEach(this::deregisterSession);
     }
 
+    public void onDeviceTelemetryG1(MqttPublishMessage mqttMsg) throws AdaptorException {
+        JsonElement json = JsonMqttAdaptor.validateJsonPayload(sessionId, mqttMsg.payload());
+        int msgId = mqttMsg.variableHeader().packetId();
+        if (json.isJsonArray()) {
+            JsonArray ja = json.getAsJsonArray();
+            for(JsonElement je:ja) {
+                JsonObject jsonObj = je.getAsJsonObject();
+
+                // TODO 修改json数据字符串
+                for (Map.Entry<String, JsonElement> deviceEntry : jsonObj.entrySet()) {
+                    String deviceName = deviceEntry.getKey();
+                    Futures.addCallback(checkDeviceConnected(deviceName),
+                            new FutureCallback<GatewayDeviceSessionCtx>() {
+                                @Override
+                                public void onSuccess(@Nullable GatewayDeviceSessionCtx deviceCtx) {
+                                    if (!deviceEntry.getValue().isJsonArray()) {
+                                        throw new JsonSyntaxException(CAN_T_PARSE_VALUE + json);
+                                    }
+                                    TransportProtos.PostTelemetryMsg postTelemetryMsg = JsonConverter.convertToTelemetryProto(deviceEntry.getValue().getAsJsonArray());
+                                    transportService.process(deviceCtx.getSessionInfo(), postTelemetryMsg, getPubAckCallback(channel, deviceName, msgId, postTelemetryMsg));
+                                }
+
+                                @Override
+                                public void onFailure(Throwable t) {
+                                    log.debug("[{}] Failed to process device teleemtry command: {}", sessionId, deviceName, t);
+                                }
+                            }, context.getExecutor());
+                }
+            }
+        } else {
+            throw new JsonSyntaxException(CAN_T_PARSE_VALUE + json);
+        }
+    }
+
     public void onDeviceTelemetry(MqttPublishMessage mqttMsg) throws AdaptorException {
         JsonElement json = JsonMqttAdaptor.validateJsonPayload(sessionId, mqttMsg.payload());
         int msgId = mqttMsg.variableHeader().packetId();
