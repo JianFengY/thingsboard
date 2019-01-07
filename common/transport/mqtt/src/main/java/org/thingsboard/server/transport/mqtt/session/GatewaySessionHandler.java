@@ -158,15 +158,14 @@ public class GatewaySessionHandler {
         devices.forEach(this::deregisterSession);
     }
 
-    public void onDeviceTelemetryG1(MqttPublishMessage mqttMsg) throws AdaptorException { 
+    public void onDeviceTelemetryG1(MqttPublishMessage mqttMsg) throws AdaptorException {
         JsonElement json = JsonMqttAdaptor.validateJsonPayload(sessionId, mqttMsg.payload());
         int msgId = mqttMsg.variableHeader().packetId();
         if (json.isJsonArray()) {
-        	JsonArray ja = json.getAsJsonArray();
-        	for(JsonElement je:ja) {
-        		JsonObject jsonObj = je.getAsJsonObject();
-        		
-        		// TODO 修改json数据字符串 
+            JsonArray ja = json.getAsJsonArray();
+            for(JsonElement je:ja) {
+                JsonObject jsonObj = je.getAsJsonObject();
+                // TODO 修改json数据字符串
                 for (Map.Entry<String, JsonElement> deviceEntry : jsonObj.entrySet()) {
                     String deviceName = deviceEntry.getKey();
                     Futures.addCallback(checkDeviceConnected(deviceName),
@@ -186,12 +185,12 @@ public class GatewaySessionHandler {
                                 }
                             }, context.getExecutor());
                 }
-        	}
+            }
         } else {
             throw new JsonSyntaxException(CAN_T_PARSE_VALUE + json);
         }
     }
-    
+
     public void onDeviceTelemetry(MqttPublishMessage mqttMsg) throws AdaptorException {
         JsonElement json = JsonMqttAdaptor.validateJsonPayload(sessionId, mqttMsg.payload());
         int msgId = mqttMsg.variableHeader().packetId();

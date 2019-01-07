@@ -43,6 +43,7 @@ public class MqttTopics {
     public static final String G1_GATEWAY_UPDATA = "UPDATA"; 
 
 
+
     private MqttTopics() {
     }
 }
