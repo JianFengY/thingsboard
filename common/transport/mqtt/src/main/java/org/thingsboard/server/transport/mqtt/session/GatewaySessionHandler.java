@@ -165,7 +165,6 @@ public class GatewaySessionHandler {
             JsonArray ja = json.getAsJsonArray();
             for(JsonElement je:ja) {
                 JsonObject jsonObj = je.getAsJsonObject();
-
                 // TODO 修改json数据字符串
                 for (Map.Entry<String, JsonElement> deviceEntry : jsonObj.entrySet()) {
                     String deviceName = deviceEntry.getKey();
