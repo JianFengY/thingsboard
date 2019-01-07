@@ -164,7 +164,7 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
         if (!checkConnected(ctx, mqttMsg)) {
             return;
         }
-        String topicName = mqttMsg.variableHeader().topicName();
+        String topicName = mqttMsg.variableHeader().topicName(); 
         int msgId = mqttMsg.variableHeader().packetId();
         log.trace("[{}][{}] Processing publish msg [{}][{}]!", sessionId, deviceSessionCtx.getDeviceId(), topicName, msgId);
 
