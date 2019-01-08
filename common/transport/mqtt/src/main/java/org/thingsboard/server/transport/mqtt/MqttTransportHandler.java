@@ -200,7 +200,7 @@ public class MqttTransportHandler extends ChannelInboundHandlerAdapter implement
                     break;
                 case MqttTopics.G1_GATEWAY_UPDATA:
                 	// G1 数据上行
-                	gatewaySessionHandler.onDeviceTelemetryG1(mqttMsg); 
+                	gatewaySessionHandler.onDeviceTelemetryG1(mqttMsg);
                 	break;
                 case MqttTopics.G1_GATEWAY_DOWNDATA:
                 	// TODO G1 数据下行

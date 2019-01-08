@@ -40,7 +40,7 @@ public class MqttTopics {
     public static final String GATEWAY_ATTRIBUTES_REQUEST_TOPIC = BASE_GATEWAY_API_TOPIC + "/attributes/request";
     public static final String GATEWAY_ATTRIBUTES_RESPONSE_TOPIC = BASE_GATEWAY_API_TOPIC + "/attributes/response";
     public static final String G1_GATEWAY_DOWNDATA = "DOWNDATA";
-    public static final String G1_GATEWAY_UPDATA = "UPDATA";  
+    public static final String G1_GATEWAY_UPDATA = "UPDATA"; 
 
 
 

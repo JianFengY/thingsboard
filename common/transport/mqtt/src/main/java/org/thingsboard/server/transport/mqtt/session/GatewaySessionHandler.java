@@ -158,7 +158,7 @@ public class GatewaySessionHandler {
         devices.forEach(this::deregisterSession);
     }
 
-    public void onDeviceTelemetryG1(MqttPublishMessage mqttMsg) throws AdaptorException { 
+    public void onDeviceTelemetryG1(MqttPublishMessage mqttMsg) throws AdaptorException {
         JsonElement json = JsonMqttAdaptor.validateJsonPayload(sessionId, mqttMsg.payload());
         int msgId = mqttMsg.variableHeader().packetId();
         if (json.isJsonArray()) {
