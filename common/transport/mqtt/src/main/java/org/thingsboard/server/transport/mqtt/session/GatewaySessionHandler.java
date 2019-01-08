@@ -165,26 +165,56 @@ public class GatewaySessionHandler {
             JsonArray ja = json.getAsJsonArray();
             for(JsonElement je:ja) {
                 JsonObject jsonObj = je.getAsJsonObject();
-                // TODO 修改json数据字符串
-                for (Map.Entry<String, JsonElement> deviceEntry : jsonObj.entrySet()) {
-                    String deviceName = deviceEntry.getKey();
-                    Futures.addCallback(checkDeviceConnected(deviceName),
-                            new FutureCallback<GatewayDeviceSessionCtx>() {
-                                @Override
-                                public void onSuccess(@Nullable GatewayDeviceSessionCtx deviceCtx) {
-                                    if (!deviceEntry.getValue().isJsonArray()) {
-                                        throw new JsonSyntaxException(CAN_T_PARSE_VALUE + json);
+                JsonObject attributeJo = new JsonObject();
+                for (Map.Entry<String, JsonElement> attributeEntry : jsonObj.entrySet()) {
+                    String attributeName = attributeEntry.getKey();
+                    if(!attributeName.equals("body")) {//构造网关的属性数据
+                    	attributeJo.add(attributeName, attributeEntry.getValue());
+                    }
+                    else {//将body数据转换成device遥测数据发送
+                    	JsonObject deviceArray = attributeEntry.getValue().getAsJsonObject();
+                    	for (Map.Entry<String, JsonElement> deviceEntry : deviceArray.entrySet()) {
+                    		String deviceName = deviceEntry.getKey();
+	                    	Futures.addCallback(checkDeviceConnected(deviceName),
+                                new FutureCallback<GatewayDeviceSessionCtx>() {
+                                    @Override
+                                    public void onSuccess(@Nullable GatewayDeviceSessionCtx deviceCtx) {
+                                        if (!deviceEntry.getValue().isJsonObject()) {
+                                            throw new JsonSyntaxException(CAN_T_PARSE_VALUE + json);
+                                        }
+                                        JsonObject deviceTelemetryJo = deviceEntry.getValue().getAsJsonObject();
+                                        JsonObject telemetryJo = deviceTelemetryJo.get("REG_VAL").getAsJsonObject();
+                                        for (Map.Entry<String, JsonElement> telemetry : telemetryJo.entrySet()) {
+                                        	deviceTelemetryJo.add(telemetry.getKey(), telemetry.getValue());
+                                        }
+                                        deviceTelemetryJo.remove("REG_VAL");
+                                        TransportProtos.PostTelemetryMsg postTelemetryMsg = JsonConverter.convertToTelemetryProto(deviceTelemetryJo);
+                                        transportService.process(deviceCtx.getSessionInfo(), postTelemetryMsg, getPubAckCallback(channel, deviceName, msgId, postTelemetryMsg));
                                     }
-                                    TransportProtos.PostTelemetryMsg postTelemetryMsg = JsonConverter.convertToTelemetryProto(deviceEntry.getValue().getAsJsonArray());
-                                    transportService.process(deviceCtx.getSessionInfo(), postTelemetryMsg, getPubAckCallback(channel, deviceName, msgId, postTelemetryMsg));
-                                }
 
-                                @Override
-                                public void onFailure(Throwable t) {
-                                    log.debug("[{}] Failed to process device teleemtry command: {}", sessionId, deviceName, t);
-                                }
-                            }, context.getExecutor());
+                                    @Override
+                                    public void onFailure(Throwable t) {
+                                        log.debug("[{}] Failed to process device teleemtry command: {}", sessionId, deviceName, t);
+                                    }
+                                }, context.getExecutor());
+	                    }
+                    }
                 }
+                
+                //往gateway网关发送属性数据
+            	TransportProtos.PostAttributeMsg postAttributeMsg = JsonConverter.convertToAttributesProto(attributeJo);
+            	SessionInfoProto sessionInfo = SessionInfoProto.newBuilder()
+                        .setNodeId(context.getNodeId())
+                        .setSessionIdMSB(sessionId.getMostSignificantBits())
+                        .setSessionIdLSB(sessionId.getLeastSignificantBits())
+                        .setDeviceIdMSB(gateway.getDeviceIdMSB())
+                        .setDeviceIdLSB(gateway.getDeviceIdLSB())
+                        .setTenantIdMSB(gateway.getTenantIdMSB())
+                        .setTenantIdLSB(gateway.getTenantIdLSB())
+                        .build();
+            	
+            	transportService.process(sessionInfo, postAttributeMsg, getPubAckCallback(channel, gateway.getDeviceName(), msgId, postAttributeMsg));
+                
             }
         } else {
             throw new JsonSyntaxException(CAN_T_PARSE_VALUE + json);
